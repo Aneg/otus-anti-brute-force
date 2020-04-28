@@ -1,0 +1,34 @@
+version: "2"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/app/Dockerfile
+    volumes:
+      - .:/app
+    ports:
+      - "8080:8080"
+    links:
+      - "db"
+      - "as"
+    command: go run cmd/anty-brute-force/main.go
+  as:
+    image: aerospike/aerospike-server
+    volumes:
+      - ./docker/as/conf:/opt/aerospike/etc
+    ports:
+      - 3000:3000
+    environment:
+      - NAMESPACE=anti_brute_force
+  db:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: anti_brute_force
+    ports:
+      - 3306:3306
+    volumes:
+      - ./migrations/0001_init.sql:/docker-entrypoint-initdb.d/dump.sql
+      - ./../mysql_data:/var/lib/mysql

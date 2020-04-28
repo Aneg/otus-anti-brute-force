@@ -1,0 +1,17 @@
+{
+  "http_listen" : "127.0.0.1:8881",
+  "log_file": "logs/logs.log",
+  "log_level": "info",
+
+  "db_host_port": db,
+  "db_name": "anti_brute_force",
+  "db_user": "root",
+  "db_pass": "root",
+
+  "aerospike_cluster": [
+    {
+      "host": "127.0.0.1",
+      "port": "3000"
+    }
+  ]
+}

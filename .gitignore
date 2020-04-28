@@ -1,0 +1,6 @@
+.idea
+config
+logs
+docker/mysql/data
+docker/as/conf
+vendor/

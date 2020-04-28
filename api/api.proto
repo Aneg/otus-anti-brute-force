@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package api;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "api";
+
+service AntiBruteForce {
+    rpc Check (CheckRequest) returns (SuccessResponse) {};
+    rpc AddWhiteMask (AddWhiteMaskRequest) returns (SuccessResponse) {};
+    rpc DropWhiteMask (DropWhiteMaskRequest) returns (SuccessResponse) {};
+    rpc AddBlackMask (AddBlackMaskRequest) returns (SuccessResponse) {};
+    rpc DropBlackMask (DropBlackMaskRequest) returns (SuccessResponse) {};
+}
+
+message CheckRequest {
+    string login = 1;
+    string password = 2;
+    string ip = 3;
+}
+
+message AddWhiteMaskRequest {
+    string mask = 1;
+}
+
+message DropWhiteMaskRequest {
+    string mask = 1;
+}
+
+message AddBlackMaskRequest {
+    string mask = 1;
+}
+
+message DropBlackMaskRequest {
+    string mask = 1;
+}
+
+message SuccessResponse {
+    bool success = 1;
+}
