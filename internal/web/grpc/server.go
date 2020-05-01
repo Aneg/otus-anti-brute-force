@@ -12,7 +12,7 @@ import (
 
 const InvalidMaskError = "invalid mask"
 
-func NewServer() *Server {
+func NewServer(whiteList services.IpGuard, blackList services.IpGuard) *Server {
 	return &Server{}
 }
 
