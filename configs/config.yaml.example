@@ -8,6 +8,7 @@
   "db_user": "root",
   "db_pass": "root",
 
+  "aerospike_namespace": "anti_brute_force",
   "aerospike_cluster": [
     {
       "host": "127.0.0.1",
