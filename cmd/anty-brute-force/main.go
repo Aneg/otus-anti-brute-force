@@ -3,8 +3,10 @@ package main
 import (
 	"flag"
 	"github.com/Aneg/otus-anti-brute-force/internal/config"
+	"github.com/Aneg/otus-anti-brute-force/internal/repositories/aerospike"
 	"github.com/Aneg/otus-anti-brute-force/internal/repositories/mysql"
 	"github.com/Aneg/otus-anti-brute-force/internal/services"
+	"github.com/Aneg/otus-anti-brute-force/internal/services/bucket"
 	"github.com/Aneg/otus-anti-brute-force/internal/services/ip_guard"
 	"github.com/Aneg/otus-anti-brute-force/internal/services/worker"
 	grpc2 "github.com/Aneg/otus-anti-brute-force/internal/web/grpc"
@@ -37,13 +39,25 @@ func main() {
 	}
 
 	maskRepository := mysql.NewMasksRepository(dbConn)
+
+	asConn, err := database.AerospikeOpenClusterConnection(conf.AerospikeCluster, nil)
+	if err != nil {
+		log2.Logger.Fatal(err.Error())
+	}
+	// TODO: вынести в настройки
+	expiration := 60
+	bucketsRepository, err := aerospike.NewBucketsRepository(asConn, conf.AsNamespace, "buckets", uint32(expiration))
+	if err != nil {
+		log2.Logger.Fatal(err.Error())
+	}
+
 	whiteList := ip_guard.NewMemoryIpGuard(1, maskRepository)
 	blackList := ip_guard.NewMemoryIpGuard(2, maskRepository)
 	errorWorkerChan := make(chan error, 100)
 	reloaderMasksWorker := worker.NewReloaderMasks([]services.IpGuard{whiteList, blackList}, errorWorkerChan)
 
 	go func(errorChan chan error, closeChan chan bool) {
-		for true {
+		for {
 			select {
 			case err := <-errorChan:
 				log2.Logger.Error(err.Error())
@@ -52,6 +66,11 @@ func main() {
 			}
 		}
 	}(errorWorkerChan, closeChan)
+
+	// не реализованная заглушка
+	bucketIp := bucket.NewBucket("ip", bucketsRepository, 10)
+	bucketLogin := bucket.NewBucket("login", bucketsRepository, 10)
+	bucketPassword := bucket.NewBucket("password", bucketsRepository, 10)
 
 	worker2.Start(reloaderMasksWorker)
 
@@ -62,12 +81,14 @@ func main() {
 	grpcServer := grpc.NewServer()
 	reflection.Register(grpcServer)
 
-	server := grpc2.NewServer(whiteList, blackList)
+	server := grpc2.NewServer(whiteList, blackList, bucketIp, bucketLogin, bucketPassword)
 	api.RegisterAntiBruteForceServer(grpcServer, server)
 	log2.Logger.Info("Начинаем слушать...")
 	if err := grpcServer.Serve(lis); err != nil {
 		log2.Logger.Fatal(err.Error())
 	}
+	// TODO: Нужен слушатель на событие экстренного завершения работы, который бы кидал в канал сообщение на завершение
+	closeChan <- true
 }
 
 func getConfigDir() string {
@@ -82,13 +103,10 @@ func getLogger(logFile, logLevel string) (logger *zap.Logger, err error) {
 	switch logLevel {
 	case "debug":
 		level = zapcore.DebugLevel
-		break
 	case "info":
 		level = zapcore.InfoLevel
-		break
 	case "warn":
 		level = zapcore.WarnLevel
-		break
 	case "error":
 		level = zapcore.ErrorLevel
 	}

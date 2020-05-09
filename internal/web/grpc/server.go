@@ -7,21 +7,32 @@ import (
 	"github.com/Aneg/otus-anti-brute-force/pkg/log"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"net"
 )
 
 const InvalidMaskError = "invalid mask"
 
-func NewServer(whiteList services.IpGuard, blackList services.IpGuard) *Server {
-	return &Server{}
+func NewServer(
+	whiteList services.IpGuard,
+	blackList services.IpGuard,
+	bucketIp services.Bucket,
+	bucketLogin services.Bucket,
+	bucketPassword services.Bucket,
+) *Server {
+	return &Server{
+		whiteList: whiteList,
+		blackList: blackList,
+		buckets: map[string]services.Bucket{
+			"ip":       bucketIp,
+			"login":    bucketLogin,
+			"password": bucketPassword,
+		},
+	}
 }
 
 type Server struct {
-	whiteList      services.IpGuard
-	blackList      services.IpGuard
-	bucketIp       services.Bucket
-	bucketLogin    services.Bucket
-	bucketPassword services.Bucket
+	whiteList services.IpGuard
+	blackList services.IpGuard
+	buckets   map[string]services.Bucket
 }
 
 func (s Server) Check(ctx context.Context, request *api.CheckRequest) (*api.SuccessResponse, error) {
@@ -39,9 +50,13 @@ func (s Server) Check(ctx context.Context, request *api.CheckRequest) (*api.Succ
 		return &api.SuccessResponse{Success: false}, nil
 	}
 
-	for _, verifiedData := range []string{request.Ip, request.Login, request.Password} {
-		if hold, err := s.bucketIp.Hold(verifiedData); err != nil {
-			log.Logger.Error(err.Error())
+	for bucketName, verifiedData := range map[string]string{"ip": request.Ip, "login": request.Login, "Password": request.Password} {
+		if _, ok := s.buckets[bucketName]; !ok {
+			log.Logger.Error("запрошен не существующий bucket: " + bucketName)
+			continue
+		}
+		if hold, err := s.buckets[bucketName].Hold(verifiedData); err != nil {
+			log.Logger.Error(bucketName + ": " + err.Error())
 			return nil, status.Error(codes.FailedPrecondition, err.Error())
 		} else if hold {
 			return &api.SuccessResponse{Success: false}, nil
@@ -88,13 +103,4 @@ func dropMaskToList(list services.IpGuard, mask string) (*api.SuccessResponse, e
 	} else {
 		return &api.SuccessResponse{Success: ok}, nil
 	}
-}
-
-func isMask() bool {
-	_, _, err := net.ParseCIDR("10.0.1.0/8")
-	//ipv4Net.Contains()
-	if err != nil {
-		return false
-	}
-	return true
 }

@@ -20,7 +20,7 @@ func (r *MasksRepository) Add(mask *models.Mask) error {
 }
 
 func (r *MasksRepository) Drop(id int) error {
-	for i, _ := range r.Rows {
+	for i := range r.Rows {
 		if r.Rows[i].Id != id {
 			continue
 		}

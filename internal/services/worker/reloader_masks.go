@@ -26,7 +26,7 @@ func (w *ReloaderMasks) Exec() {
 }
 
 func (w *ReloaderMasks) GetInterval() time.Duration {
-	return time.Second * 4
+	return time.Second * 5
 }
 
 func (w *ReloaderMasks) IsStopped() bool {

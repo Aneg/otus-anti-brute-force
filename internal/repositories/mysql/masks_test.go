@@ -17,7 +17,6 @@ func init() {
 	rand.Seed(time.Now().Unix())
 	var configDir = "../../../configs/config.yaml"
 
-	config.GetConfigFromFile(configDir)
 	conf, err := config.GetConfigFromFile(configDir)
 	if err != nil {
 		log.Fatal(err)
