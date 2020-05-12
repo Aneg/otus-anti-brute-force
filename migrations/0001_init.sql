@@ -1,3 +1,6 @@
+use anti_brute_force;
+
+
 CREATE TABLE IF NOT EXISTS masks (
   id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
   list_id SMALLINT NOT NULL,

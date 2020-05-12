@@ -31,4 +31,4 @@ services:
       - 3306:3306
     volumes:
       - ./migrations/0001_init.sql:/docker-entrypoint-initdb.d/dump.sql
-      - ./../mysql_data:/var/lib/mysql
+      - ./../mysql_data5:/var/lib/mysql

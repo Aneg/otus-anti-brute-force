@@ -11,8 +11,8 @@
   "aerospike_namespace": "anti_brute_force",
   "aerospike_cluster": [
     {
-      "host": "127.0.0.1",
-      "port": "3000"
+      "host": as,
+      "port": 3000
     }
   ]
 }
