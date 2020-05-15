@@ -23,7 +23,7 @@ func init() {
 	if err != nil {
 		log.Fatal("fsdfsdfsdf", err)
 	}
-	if bRep, err = NewBucketsRepository(conn, conf.AsNamespace, "test_bucket", 2); err != nil {
+	if bRep, err = NewBucketsRepository(conn, conf.AsNamespace, "test_bucket", 1); err != nil {
 		log.Fatal("create rep", err)
 	}
 }
@@ -51,7 +51,7 @@ func TestBucketsRepository_GetCountByKey(t *testing.T) {
 		t.Errorf("%d != 3", count)
 	}
 
-	time.Sleep(time.Second * 3)
+	time.Sleep(time.Second * 2)
 
 	count, err = bRep.GetCountByKey("test1", "test1")
 	if err != nil {

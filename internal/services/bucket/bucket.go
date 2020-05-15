@@ -21,10 +21,10 @@ type Bucket struct {
 func (b *Bucket) Hold(str string) (bool, error) {
 	count, err := b.repository.GetCountByKey(b.name, str)
 	if err != nil {
-		return true, err
+		return false, err
 	}
 	if count <= b.size {
-		return true, b.repository.Add(b.name, str)
+		return false, b.repository.Add(b.name, str)
 	}
-	return false, nil
+	return true, nil
 }

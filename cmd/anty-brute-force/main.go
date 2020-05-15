@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"github.com/Aneg/otus-anti-brute-force/internal/config"
+	"github.com/Aneg/otus-anti-brute-force/internal/constants"
 	"github.com/Aneg/otus-anti-brute-force/internal/repositories/aerospike"
 	"github.com/Aneg/otus-anti-brute-force/internal/repositories/mysql"
 	"github.com/Aneg/otus-anti-brute-force/internal/services"
@@ -51,8 +52,8 @@ func main() {
 		log2.Logger.Fatal(err.Error())
 	}
 
-	whiteList := ip_guard.NewMemoryIpGuard(1, maskRepository)
-	blackList := ip_guard.NewMemoryIpGuard(2, maskRepository)
+	whiteList := ip_guard.NewMemoryIpGuard(constants.WhiteList, maskRepository)
+	blackList := ip_guard.NewMemoryIpGuard(constants.BlackList, maskRepository)
 	errorWorkerChan := make(chan error, 100)
 	reloaderMasksWorker := worker.NewReloaderMasks([]services.IpGuard{whiteList, blackList}, errorWorkerChan)
 
@@ -81,7 +82,9 @@ func main() {
 	grpcServer := grpc.NewServer()
 	reflection.Register(grpcServer)
 
-	server := grpc2.NewServer(whiteList, blackList, bucketIp, bucketLogin, bucketPassword)
+	server := grpc2.NewServer(whiteList, blackList, bucketIp, bucketLogin, bucketPassword, func(err string) {
+		log2.Logger.Error(err)
+	})
 	api.RegisterAntiBruteForceServer(grpcServer, server)
 	log2.Logger.Info("Начинаем слушать...")
 	if err := grpcServer.Serve(lis); err != nil {

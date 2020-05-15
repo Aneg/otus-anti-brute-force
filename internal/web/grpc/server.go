@@ -17,8 +17,10 @@ func NewServer(
 	bucketIp services.Bucket,
 	bucketLogin services.Bucket,
 	bucketPassword services.Bucket,
+	logError func(err string),
 ) *Server {
 	return &Server{
+		logError:  logError,
 		whiteList: whiteList,
 		blackList: blackList,
 		buckets: map[string]services.Bucket{
@@ -33,18 +35,19 @@ type Server struct {
 	whiteList services.IpGuard
 	blackList services.IpGuard
 	buckets   map[string]services.Bucket
+	logError  func(err string)
 }
 
-func (s Server) Check(ctx context.Context, request *api.CheckRequest) (*api.SuccessResponse, error) {
+func (s *Server) Check(ctx context.Context, request *api.CheckRequest) (*api.SuccessResponse, error) {
 	if inWhiteList, err := s.whiteList.Contains(request.Ip); err != nil {
-		log.Logger.Error(err.Error())
+		s.logError(err.Error())
 		return nil, status.Error(codes.FailedPrecondition, err.Error())
 	} else if inWhiteList {
 		return &api.SuccessResponse{Success: true}, nil
 	}
 
 	if inBlackList, err := s.blackList.Contains(request.Ip); err != nil {
-		log.Logger.Error(err.Error())
+		s.logError(err.Error())
 		return nil, status.Error(codes.FailedPrecondition, err.Error())
 	} else if inBlackList {
 		return &api.SuccessResponse{Success: false}, nil
@@ -52,7 +55,7 @@ func (s Server) Check(ctx context.Context, request *api.CheckRequest) (*api.Succ
 
 	for bucketName, verifiedData := range map[string]string{"ip": request.Ip, "login": request.Login, "Password": request.Password} {
 		if _, ok := s.buckets[bucketName]; !ok {
-			log.Logger.Error("запрошен не существующий bucket: " + bucketName)
+			s.logError("запрошен не существующий bucket: " + bucketName)
 			continue
 		}
 		if hold, err := s.buckets[bucketName].Hold(verifiedData); err != nil {
