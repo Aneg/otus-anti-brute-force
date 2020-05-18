@@ -22,6 +22,8 @@ func init() {
 	conn, err := database.AerospikeOpenClusterConnection(conf.AerospikeCluster, nil)
 	if err != nil {
 		log.Fatal("fsdfsdfsdf", err)
+	} else {
+		log.Println("AerospikeOpenClusterConnection true")
 	}
 	if bRep, err = NewBucketsRepository(conn, conf.AsNamespace, "test_bucket", 1); err != nil {
 		log.Fatal("create rep", err)
@@ -29,35 +31,37 @@ func init() {
 }
 
 func TestBucketsRepository_GetCountByKey(t *testing.T) {
-	rows := []row{
-		{BucketName: "test1", Value: "test1"},
-		{BucketName: "test1", Value: "test1"},
-		{BucketName: "test1", Value: "test1"},
-		{BucketName: "test1", Value: "test2"},
-		{BucketName: "test2", Value: "test1"},
-	}
+	t.Run("GetCountByKey", func(t *testing.T) {
+		rows := []row{
+			{BucketName: "test1", Value: "test1"},
+			{BucketName: "test1", Value: "test1"},
+			{BucketName: "test1", Value: "test1"},
+			{BucketName: "test1", Value: "test2"},
+			{BucketName: "test2", Value: "test1"},
+		}
 
-	for i := range rows {
-		if err := bRep.Add(rows[i].BucketName, rows[i].Value); err != nil {
+		for i := range rows {
+			if err := bRep.Add(rows[i].BucketName, rows[i].Value); err != nil {
+				t.Error(err)
+			}
+		}
+
+		count, err := bRep.GetCountByKey("test1", "test1")
+		if err != nil {
 			t.Error(err)
 		}
-	}
+		if count != 3 {
+			t.Errorf("%d != 3", count)
+		}
 
-	count, err := bRep.GetCountByKey("test1", "test1")
-	if err != nil {
-		t.Error(err)
-	}
-	if count != 3 {
-		t.Errorf("%d != 3", count)
-	}
+		time.Sleep(time.Second * 2)
 
-	time.Sleep(time.Second * 2)
-
-	count, err = bRep.GetCountByKey("test1", "test1")
-	if err != nil {
-		t.Error(err)
-	}
-	if count != 0 {
-		t.Errorf("%d != 0", count)
-	}
+		count, err = bRep.GetCountByKey("test1", "test1")
+		if err != nil {
+			t.Error(err)
+		}
+		if count != 0 {
+			t.Errorf("%d != 0", count)
+		}
+	})
 }

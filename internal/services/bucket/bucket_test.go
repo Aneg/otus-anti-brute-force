@@ -14,13 +14,13 @@ func TestBucket_Hold(t *testing.T) {
 	asRep := mock.BucketsRepository{
 		Data: map[string]uint{"test": 1},
 	}
-	bucket := NewBucket("test", &asRep, 2)
+	bucket := NewBucket("test", &asRep, 3)
 	ok, err := bucket.Hold("test")
 	if err != nil {
 		t.Error(err)
 	}
-	if !ok {
-		t.Error("!ok")
+	if ok {
+		t.Error("ok")
 	}
 	if asRep.Data["test"] != 2 {
 		t.Error("count not increment")
@@ -30,8 +30,8 @@ func TestBucket_Hold(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if !ok {
-		t.Error("!ok")
+	if ok {
+		t.Error("ok")
 	}
 	if asRep.Data["test"] != 3 {
 		t.Error("count not increment")
@@ -41,7 +41,7 @@ func TestBucket_Hold(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if ok {
+	if !ok {
 		t.Error("ok")
 	}
 	if asRep.Data["test"] != 3 {

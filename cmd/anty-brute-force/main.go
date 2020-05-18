@@ -45,9 +45,7 @@ func main() {
 	if err != nil {
 		log2.Logger.Fatal(err.Error())
 	}
-	// TODO: вынести в настройки
-	expiration := 60
-	bucketsRepository, err := aerospike.NewBucketsRepository(asConn, conf.AsNamespace, "buckets", uint32(expiration))
+	bucketsRepository, err := aerospike.NewBucketsRepository(asConn, conf.AsNamespace, "buckets", conf.ExpirationSecondsBuckets)
 	if err != nil {
 		log2.Logger.Fatal(err.Error())
 	}
@@ -69,9 +67,9 @@ func main() {
 	}(errorWorkerChan, closeChan)
 
 	// не реализованная заглушка
-	bucketIp := bucket.NewBucket("ip", bucketsRepository, 10)
-	bucketLogin := bucket.NewBucket("login", bucketsRepository, 10)
-	bucketPassword := bucket.NewBucket("password", bucketsRepository, 10)
+	bucketIp := bucket.NewBucket("ip", bucketsRepository, conf.IpBucketMax)
+	bucketLogin := bucket.NewBucket("login", bucketsRepository, conf.LoginBucketMax)
+	bucketPassword := bucket.NewBucket("password", bucketsRepository, conf.PasswordBucketMax)
 
 	worker2.Start(reloaderMasksWorker)
 

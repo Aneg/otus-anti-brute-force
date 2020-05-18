@@ -53,7 +53,7 @@ func (s *Server) Check(ctx context.Context, request *api.CheckRequest) (*api.Suc
 		return &api.SuccessResponse{Success: false}, nil
 	}
 
-	for bucketName, verifiedData := range map[string]string{"ip": request.Ip, "login": request.Login, "Password": request.Password} {
+	for bucketName, verifiedData := range map[string]string{"ip": request.Ip, "login": request.Login, "password": request.Password} {
 		if _, ok := s.buckets[bucketName]; !ok {
 			s.logError("запрошен не существующий bucket: " + bucketName)
 			continue

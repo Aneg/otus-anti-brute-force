@@ -42,7 +42,7 @@ type BucketsRepository struct {
 	db        *aerospike.Client
 }
 
-func (b BucketsRepository) Add(bucketName, value string) error {
+func (b *BucketsRepository) Add(bucketName, value string) error {
 	key, err := aerospike.NewKey(b.NameSpace, b.SetsName, uuid.New().String())
 	if err != nil {
 		return err
@@ -53,7 +53,7 @@ func (b BucketsRepository) Add(bucketName, value string) error {
 	})
 }
 
-func (b BucketsRepository) GetCountByKey(bucketName, value string) (uint, error) {
+func (b *BucketsRepository) GetCountByKey(bucketName, value string) (uint, error) {
 	stmt := aerospike.NewStatement(b.NameSpace, b.SetsName)
 	f := aerospike.NewEqualFilter(`bucket_name2`, bucketName)
 	_ = stmt.SetFilter(f)

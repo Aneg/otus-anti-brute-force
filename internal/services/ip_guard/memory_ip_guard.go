@@ -35,7 +35,6 @@ func (m *MemoryIpGuard) AddMask(mask string) (bool, error) {
 
 	for i := range m.masks {
 		if m.masks[i].IP.String() == ipv4Net.IP.String() && m.masks[i].Mask.String() == ipv4Net.Mask.String() {
-			// todo а оно работает?
 			return false, nil
 		}
 	}
@@ -64,7 +63,6 @@ func (m *MemoryIpGuard) DropMask(mask string) (bool, error) {
 
 	for id := range m.masks {
 		if m.masks[id].IP.String() != ipv4Net.IP.String() || m.masks[id].Mask.String() != ipv4Net.Mask.String() {
-			// todo а оно работает?
 			continue
 		}
 

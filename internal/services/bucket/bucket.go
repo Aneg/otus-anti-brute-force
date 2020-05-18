@@ -23,7 +23,7 @@ func (b *Bucket) Hold(str string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	if count <= b.size {
+	if count < b.size {
 		return false, b.repository.Add(b.name, str)
 	}
 	return true, nil
