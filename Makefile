@@ -4,6 +4,8 @@ stop:
 	docker-compose down
 build:
 	docker-compose run app go build -mod=mod cmd/anty-brute-force/main.go
+build-console:
+	docker-compose run app go build -mod=mod cmd/management_console/main.go
 test:
 	docker-compose run app go test -race -count 100 ./...
 test-integration:

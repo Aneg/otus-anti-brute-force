@@ -56,15 +56,19 @@ func main() {
 	} else {
 		log.Fatalf("list name not correct")
 	}
+	if err := list.Reload(); err != nil {
+		log.Fatalf("list reload error: %s", err)
+	}
 
 	var ok bool
+	log.Printf("%s %s %s", action, listName, mask)
 	if action == "add" {
 		ok, err = list.AddMask(mask)
 	} else if action == "drop" {
 		ok, err = list.DropMask(mask)
 	}
 	if err != nil {
-		log.Fatalf(err.Error())
+		log.Fatalf("%s error: %s", action, err)
 	}
-	fmt.Printf("ok = %v", ok)
+	fmt.Printf("ok = %v\n", ok)
 }
