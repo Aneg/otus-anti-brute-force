@@ -68,6 +68,9 @@ func (b *BucketsRepository) GetCountByKey(bucketName, value string) (uint, error
 	if recs, err := b.db.Query(queryPolicy, stmt); err != nil {
 		return 0, err
 	} else {
+		defer func() {
+			_ = recs.Close()
+		}()
 		for res := range recs.Results() {
 			if res.Err != nil {
 				return 0, res.Err
@@ -77,4 +80,34 @@ func (b *BucketsRepository) GetCountByKey(bucketName, value string) (uint, error
 		}
 	}
 	return count, nil
+}
+
+func (b *BucketsRepository) Drop(bucketName, value string) error {
+	stmt := aerospike.NewStatement(b.NameSpace, b.SetsName)
+	f := aerospike.NewEqualFilter(`bucket_name2`, bucketName)
+	_ = stmt.SetFilter(f)
+	queryPolicy := aerospike.NewQueryPolicy()
+	queryPolicy.PredExp = []aerospike.PredExp{
+		aerospike.NewPredExpStringBin("value2"),
+		aerospike.NewPredExpStringValue(value),
+		aerospike.NewPredExpStringEqual(),
+	}
+
+	if recs, err := b.db.Query(queryPolicy, stmt); err != nil {
+		return err
+	} else {
+		defer func() {
+			_ = recs.Close()
+		}()
+		for res := range recs.Results() {
+			if res.Err != nil {
+				return res.Err
+			} else {
+				if _, err := b.db.Delete(nil, res.Record.Key); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return nil
 }
