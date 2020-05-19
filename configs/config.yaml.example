@@ -3,10 +3,10 @@
   "log_file": "logs/logs.log",
   "log_level": "info",
 
-  "expiration_seconds_buckets": 60
-  "ip_bucket_max": 100
-  "login_bucket_max": 100
-  "password_bucket_max": 100
+  "expiration_seconds_buckets": 60,
+  "ip_bucket_max": 100,
+  "login_bucket_max": 100,
+  "password_bucket_max": 100,
 
   "db_host_port": db,
   "db_name": "anti_brute_force",
