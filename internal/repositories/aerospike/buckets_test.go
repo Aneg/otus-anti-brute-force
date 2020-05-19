@@ -5,6 +5,7 @@ import (
 	"github.com/Aneg/otus-anti-brute-force/pkg/database"
 	"log"
 	"math/rand"
+	"strconv"
 	"testing"
 	"time"
 )
@@ -31,30 +32,36 @@ func init() {
 }
 
 func TestBucketsRepository_GetCountByKey(t *testing.T) {
-	t.Run("GetCountByKey", func(t *testing.T) {
-		rows := []row{
-			{BucketName: "test1", Value: "test1"},
-			{BucketName: "test1", Value: "test1"},
-			{BucketName: "test1", Value: "test1"},
-			{BucketName: "test1", Value: "test2"},
-			{BucketName: "test2", Value: "test1"},
-		}
 
+	t.Run("GetCountByKey", func(t *testing.T) {
+		test1 := strconv.Itoa(rand.Int())
+		test2 := strconv.Itoa(rand.Int())
+		rows := []row{
+			{BucketName: test1, Value: test1},
+			{BucketName: test1, Value: test1},
+			{BucketName: test1, Value: test1},
+			{BucketName: test1, Value: test2},
+			{BucketName: test2, Value: test1},
+		}
+		countOld, err := bRep.GetCountByKey(test1, test1)
+		if err != nil {
+			t.Error(err)
+		}
 		for i := range rows {
 			if err := bRep.Add(rows[i].BucketName, rows[i].Value); err != nil {
 				t.Error(err)
 			}
 		}
 
-		count, err := bRep.GetCountByKey("test1", "test1")
+		count, err := bRep.GetCountByKey(test1, test1)
 		if err != nil {
 			t.Error(err)
 		}
-		if count != 3 {
+		if count != countOld+3 {
 			t.Errorf("%d != 3", count)
 		}
 
-		time.Sleep(time.Second * 2)
+		time.Sleep(1500 * time.Millisecond)
 
 		count, err = bRep.GetCountByKey("test1", "test1")
 		if err != nil {

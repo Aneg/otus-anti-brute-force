@@ -1,25 +1,26 @@
 package worker
 
 import (
+	"context"
 	"time"
 )
 
 type Task interface {
 	Exec()
 	GetInterval() time.Duration
-	IsStopped() bool
 }
 
-func Start(w Task) {
+func Start(w Task, ctx context.Context) {
 	ticker := time.NewTicker(w.GetInterval())
 	go func() {
 		for {
-			if w.IsStopped() {
+			select {
+			case <-ticker.C:
+				w.Exec()
+			case <-ctx.Done():
 				ticker.Stop()
-				break
+				return
 			}
-			<-ticker.C
-			w.Exec()
 		}
 	}()
 }

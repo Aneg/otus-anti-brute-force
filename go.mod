@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	github.com/aerospike/aerospike-client-go v2.9.0+incompatible
+	github.com/bxcodec/faker/v3 v3.3.1
 	github.com/go-sql-driver/mysql v1.4.1 // indirect
 	github.com/golang/protobuf v1.4.0-rc.4.0.20200313231945-b860323f09d0
 	github.com/google/uuid v1.1.1

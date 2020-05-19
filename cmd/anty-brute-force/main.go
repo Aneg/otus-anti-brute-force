@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"github.com/Aneg/otus-anti-brute-force/internal/config"
 	"github.com/Aneg/otus-anti-brute-force/internal/constants"
@@ -32,12 +33,13 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	closeChan := make(chan bool)
 
 	dbConn, err := database.MysqlOpenConnection(conf.DBUser, conf.DBPass, conf.DBHostPort, conf.DBName)
 	if err != nil {
 		log2.Logger.Fatal(err.Error())
 	}
+
+	ctx, cancel := context.WithCancel(context.Background())
 
 	maskRepository := mysql.NewMasksRepository(dbConn)
 
@@ -55,23 +57,23 @@ func main() {
 	errorWorkerChan := make(chan error, 100)
 	reloaderMasksWorker := worker.NewReloaderMasks([]services.IpGuard{whiteList, blackList}, errorWorkerChan)
 
-	go func(errorChan chan error, closeChan chan bool) {
+	go func(errorChan chan error, ctx context.Context) {
 		for {
 			select {
 			case err := <-errorChan:
 				log2.Logger.Error(err.Error())
-			case <-closeChan:
+			case <-ctx.Done():
 				return
 			}
 		}
-	}(errorWorkerChan, closeChan)
+	}(errorWorkerChan, ctx)
 
 	// не реализованная заглушка
 	bucketIp := bucket.NewBucket("ip", bucketsRepository, conf.IpBucketMax)
 	bucketLogin := bucket.NewBucket("login", bucketsRepository, conf.LoginBucketMax)
 	bucketPassword := bucket.NewBucket("password", bucketsRepository, conf.PasswordBucketMax)
 
-	worker2.Start(reloaderMasksWorker)
+	worker2.Start(reloaderMasksWorker, ctx)
 
 	lis, err := net.Listen("tcp", conf.HttpListen)
 	if err != nil {
@@ -88,8 +90,8 @@ func main() {
 	if err := grpcServer.Serve(lis); err != nil {
 		log2.Logger.Fatal(err.Error())
 	}
-	// TODO: Нужен слушатель на событие экстренного завершения работы, который бы кидал в канал сообщение на завершение
-	closeChan <- true
+	cancel()
+
 }
 
 func getConfigDir() string {
