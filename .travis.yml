@@ -1,3 +1,5 @@
+dist: bionic
+
 language: go
 
 go:
@@ -7,7 +9,7 @@ env:
   - GO111MODULE=on
 
 before_install:
-  - go get -v golang.org/x/lint/golint
+  - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $GOPATH/bin v1.25.1
 script:
   - golangci-lint run
   - go test -v -race ./...
