@@ -3,7 +3,7 @@ run:
 stop:
 	docker-compose down
 build:
-	docker-compose run app go build -mod=mod cmd/anty_brute_force/main.go
+	docker-compose run app go build -mod=mod cmd/anty-brute-force/main.go
 build-console:
 	docker-compose run app go build -mod=mod cmd/management_console/main.go
 test:

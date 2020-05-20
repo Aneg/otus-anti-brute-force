@@ -12,7 +12,7 @@ services:
     links:
       - "db"
       - "as"
-    command: go run cmd/anty_brute_force/main.go
+    command: go run cmd/anty-brute-force/main.go
   as:
     image: aerospike/aerospike-server
     volumes:
