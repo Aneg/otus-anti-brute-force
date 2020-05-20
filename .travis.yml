@@ -14,5 +14,4 @@ before_install:
   - cp .netrc ~/.netrc
   - chmod 600 ~/.netrc
 
-script:
-  - go test -v ./...
+script: go mod vendor && go test ./...
