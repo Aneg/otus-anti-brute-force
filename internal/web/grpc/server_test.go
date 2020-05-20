@@ -7,6 +7,7 @@ import (
 	"github.com/Aneg/otus-anti-brute-force/internal/services/bucket"
 	"github.com/Aneg/otus-anti-brute-force/internal/services/ip_guard"
 	"github.com/Aneg/otus-anti-brute-force/pkg/api"
+	"github.com/bxcodec/faker/v3"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"
@@ -26,9 +27,14 @@ func TestServer(t *testing.T) {
 	}
 	whiteList := ip_guard.NewMemoryIpGuard(1, masksRepository)
 	blackList := ip_guard.NewMemoryIpGuard(1, masksRepository)
-	bucketIp := bucket.NewBucket("ip", &mock.BucketsRepository{Data: map[string]uint{"123.23.44.55": 2, "123.21.44.55": 1}}, 3)
-	bucketLogin := bucket.NewBucket("login", &mock.BucketsRepository{Data: map[string]uint{"test_login_1": 1, "test_login_2": 1}}, 3)
-	bucketPassword := bucket.NewBucket("password", &mock.BucketsRepository{Data: map[string]uint{"test_password_1": 1, "test_password_2": 1}}, 3)
+
+	bucketIpRep := &mock.BucketsRepository{Data: map[string]uint{"123.23.44.55": 2, "123.21.44.55": 1}}
+	bucketLoginRep := &mock.BucketsRepository{Data: map[string]uint{"test_login_1": 1, "test_login_2": 1}}
+	bucketPasswordRep := &mock.BucketsRepository{Data: map[string]uint{"test_password_1": 1, "test_password_2": 1}}
+
+	bucketIp := bucket.NewBucket("ip", bucketIpRep, 3)
+	bucketLogin := bucket.NewBucket("login", bucketLoginRep, 3)
+	bucketPassword := bucket.NewBucket("password", bucketPasswordRep, 3)
 
 	server := initServer(NewServer(whiteList, blackList, bucketIp, bucketLogin, bucketPassword, func(err string) {}))
 
@@ -135,6 +141,30 @@ func TestServer(t *testing.T) {
 		}
 		if ok {
 			t.Error("123.23.40.55 is found")
+		}
+	})
+
+	t.Run("ClearBucket", func(t *testing.T) {
+		ip := faker.IPv4()
+		login := faker.Name()
+		bucketIpRep.Data = map[string]uint{ip: 1}
+		bucketLoginRep.Data = map[string]uint{login: 2}
+
+		ctx, cancel := context.WithTimeout(context.Background(), 400*time.Millisecond)
+		defer cancel()
+
+		r, err := client.ClearBucket(ctx, &api.ClearBucketRequest{Ip: ip, Login: login})
+		if err != nil {
+			handlerError(err, t)
+		}
+		if !r.Success {
+			t.Error("not success")
+		}
+		if _, ok := bucketIpRep.Data[ip]; ok {
+			t.Error("_, ok := bucketIpRep.Data[ip]; ok")
+		}
+		if _, ok := bucketLoginRep.Data[login]; ok {
+			t.Error("_, ok := bucketLoginRep.Data[login]; ok")
 		}
 	})
 }

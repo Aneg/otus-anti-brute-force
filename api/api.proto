@@ -12,12 +12,18 @@ service AntiBruteForce {
     rpc DropWhiteMask (DropWhiteMaskRequest) returns (SuccessResponse) {};
     rpc AddBlackMask (AddBlackMaskRequest) returns (SuccessResponse) {};
     rpc DropBlackMask (DropBlackMaskRequest) returns (SuccessResponse) {};
+    rpc ClearBucket (ClearBucketRequest) returns (SuccessResponse) {};
 }
 
 message CheckRequest {
     string login = 1;
     string password = 2;
     string ip = 3;
+}
+
+message ClearBucketRequest {
+    string ip = 1;
+    string login = 2;
 }
 
 message AddWhiteMaskRequest {

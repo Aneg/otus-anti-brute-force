@@ -47,13 +47,21 @@ func main() {
 	if err != nil {
 		log2.Logger.Fatal(err.Error())
 	}
+
 	bucketsRepository, err := aerospike.NewBucketsRepository(asConn, conf.AsNamespace, "buckets", conf.ExpirationSecondsBuckets)
 	if err != nil {
 		log2.Logger.Fatal(err.Error())
 	}
 
 	whiteList := ip_guard.NewMemoryIpGuard(constants.WhiteList, maskRepository)
+	if err := whiteList.Reload(); err != nil {
+		log2.Logger.Fatal(err.Error())
+	}
 	blackList := ip_guard.NewMemoryIpGuard(constants.BlackList, maskRepository)
+	if err := blackList.Reload(); err != nil {
+		log2.Logger.Fatal(err.Error())
+	}
+
 	errorWorkerChan := make(chan error, 100)
 	reloaderMasksWorker := worker.NewReloaderMasks([]services.IpGuard{whiteList, blackList}, errorWorkerChan)
 

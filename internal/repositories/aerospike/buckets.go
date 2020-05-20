@@ -6,12 +6,12 @@ import (
 )
 
 type row struct {
-	BucketName string `as:"bucket_name2"`
-	Value      string `as:"value2"`
+	BucketName string `as:"bucket_name"`
+	Value      string `as:"value"`
 }
 
 func NewBucketsRepository(db *aerospike.Client, nameSpace, setsName string, expiration uint32) (*BucketsRepository, error) {
-	if task, err := db.CreateIndex(nil, nameSpace, setsName, "bucket_name2", "bucket_name2", aerospike.STRING); err == nil {
+	if task, err := db.CreateIndex(nil, nameSpace, setsName, setsName+"_bucket_name", "bucket_name", aerospike.STRING); err == nil {
 		err = <-task.OnComplete()
 		if err != nil {
 			return nil, err
@@ -19,7 +19,7 @@ func NewBucketsRepository(db *aerospike.Client, nameSpace, setsName string, expi
 	} else if err.Error() != "Index already exists" {
 		return nil, err
 	}
-	if task, err := db.CreateIndex(nil, nameSpace, setsName, "value2", "value2", aerospike.STRING); err == nil {
+	if task, err := db.CreateIndex(nil, nameSpace, setsName, setsName+"_value", "value", aerospike.STRING); err == nil {
 		err = <-task.OnComplete()
 		if err != nil {
 			return nil, err
@@ -55,11 +55,11 @@ func (b *BucketsRepository) Add(bucketName, value string) error {
 
 func (b *BucketsRepository) GetCountByKey(bucketName, value string) (uint, error) {
 	stmt := aerospike.NewStatement(b.NameSpace, b.SetsName)
-	f := aerospike.NewEqualFilter(`bucket_name2`, bucketName)
+	f := aerospike.NewEqualFilter(`bucket_name`, bucketName)
 	_ = stmt.SetFilter(f)
 	queryPolicy := aerospike.NewQueryPolicy()
 	queryPolicy.PredExp = []aerospike.PredExp{
-		aerospike.NewPredExpStringBin("value2"),
+		aerospike.NewPredExpStringBin("value"),
 		aerospike.NewPredExpStringValue(value),
 		aerospike.NewPredExpStringEqual(),
 	}
@@ -82,13 +82,13 @@ func (b *BucketsRepository) GetCountByKey(bucketName, value string) (uint, error
 	return count, nil
 }
 
-func (b *BucketsRepository) Drop(bucketName, value string) error {
+func (b *BucketsRepository) Clear(bucketName, value string) error {
 	stmt := aerospike.NewStatement(b.NameSpace, b.SetsName)
-	f := aerospike.NewEqualFilter(`bucket_name2`, bucketName)
+	f := aerospike.NewEqualFilter(`bucket_name`, bucketName)
 	_ = stmt.SetFilter(f)
 	queryPolicy := aerospike.NewQueryPolicy()
 	queryPolicy.PredExp = []aerospike.PredExp{
-		aerospike.NewPredExpStringBin("value2"),
+		aerospike.NewPredExpStringBin("value"),
 		aerospike.NewPredExpStringValue(value),
 		aerospike.NewPredExpStringEqual(),
 	}

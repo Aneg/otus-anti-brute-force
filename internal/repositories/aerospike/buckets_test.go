@@ -93,7 +93,7 @@ func TestBucketsRepository(t *testing.T) {
 			t.Errorf("%d == 0", count)
 		}
 
-		if err := bRep.Drop(test1, test2); err != nil {
+		if err := bRep.Clear(test1, test2); err != nil {
 			t.Error(err)
 		}
 		count, err = bRep.GetCountByKey("test1", "test1")
@@ -105,45 +105,4 @@ func TestBucketsRepository(t *testing.T) {
 		}
 	})
 
-}
-
-func TestBucketsRepository_Drop(t *testing.T) {
-	t.Run("GetCountByKey", func(t *testing.T) {
-		test1 := strconv.Itoa(rand.Int())
-		test2 := strconv.Itoa(rand.Int())
-		rows := []row{
-			{BucketName: test1, Value: test1},
-			{BucketName: test1, Value: test1},
-			{BucketName: test1, Value: test1},
-			{BucketName: test1, Value: test2},
-			{BucketName: test2, Value: test1},
-		}
-		countOld, err := bRep.GetCountByKey(test1, test1)
-		if err != nil {
-			t.Error(err)
-		}
-		for i := range rows {
-			if err := bRep.Add(rows[i].BucketName, rows[i].Value); err != nil {
-				t.Error(err)
-			}
-		}
-
-		count, err := bRep.GetCountByKey(test1, test1)
-		if err != nil {
-			t.Error(err)
-		}
-		if count != countOld+3 {
-			t.Errorf("%d != 3", count)
-		}
-
-		time.Sleep(1500 * time.Millisecond)
-
-		count, err = bRep.GetCountByKey("test1", "test1")
-		if err != nil {
-			t.Error(err)
-		}
-		if count != 0 {
-			t.Errorf("%d != 0", count)
-		}
-	})
 }

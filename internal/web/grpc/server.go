@@ -10,6 +10,8 @@ import (
 )
 
 const InvalidMaskError = "invalid mask"
+const InvalidIpError = "invalid ip"
+const InvalidLoginError = "invalid login"
 
 func NewServer(
 	whiteList services.IpGuard,
@@ -65,6 +67,24 @@ func (s *Server) Check(ctx context.Context, request *api.CheckRequest) (*api.Suc
 			return &api.SuccessResponse{Success: false}, nil
 		}
 	}
+	return &api.SuccessResponse{Success: true}, nil
+}
+
+func (s *Server) ClearBucket(ctx context.Context, request *api.ClearBucketRequest) (*api.SuccessResponse, error) {
+	if request.Ip == "" {
+		return &api.SuccessResponse{Success: false}, status.Error(codes.InvalidArgument, InvalidIpError)
+	}
+	if request.Login == "" {
+		return &api.SuccessResponse{Success: false}, status.Error(codes.InvalidArgument, InvalidLoginError)
+	}
+
+	if err := s.buckets["ip"].Clear(request.Ip); err != nil {
+		return &api.SuccessResponse{Success: false}, status.Error(codes.FailedPrecondition, err.Error())
+	}
+	if err := s.buckets["login"].Clear(request.Login); err != nil {
+		return &api.SuccessResponse{Success: false}, status.Error(codes.FailedPrecondition, err.Error())
+	}
+
 	return &api.SuccessResponse{Success: true}, nil
 }
 

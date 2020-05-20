@@ -173,4 +173,77 @@ func TestServer_Integration(t *testing.T) {
 			time.Sleep(1500 * time.Millisecond)
 		}
 	}
+
+	t.Run("Integration DropBlackMask", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.Background(), 400*time.Millisecond)
+		defer cancel()
+		_, _ = blackList.AddMask("2.23.40.55/4")
+		r, err := client.DropBlackMask(ctx, &api.DropBlackMaskRequest{Mask: "2.23.40.55/4"})
+		if err != nil {
+			handlerError(err, t)
+		}
+		if !r.Success {
+			t.Error("not success")
+		}
+		ok, err := blackList.Contains("2.23.40.55")
+		if err != nil {
+			t.Error(err)
+		}
+		if ok {
+			t.Error("2.23.40.55 found")
+		}
+	})
+
+	t.Run("Integration DropWhiteMask", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.Background(), 400*time.Millisecond)
+		defer cancel()
+		_, _ = whiteList.AddMask("2.23.40.55/4")
+		r, err := client.DropWhiteMask(ctx, &api.DropWhiteMaskRequest{Mask: "2.23.40.55/4"})
+		if err != nil {
+			handlerError(err, t)
+		}
+		if !r.Success {
+			t.Error("not success")
+		}
+		ok, err := whiteList.Contains("2.23.40.55")
+		if err != nil {
+			t.Error(err)
+		}
+		if ok {
+			t.Error("2.23.40.55 found")
+		}
+	})
+
+	t.Run("Integration ClearBucket", func(t *testing.T) {
+		ip := faker.IPv4()
+		login := faker.Name()
+
+		bucketsRepository.Add("ip", ip)
+		bucketsRepository.Add("ip", ip)
+		bucketsRepository.Add("login", login)
+		bucketsRepository.Add("login", login)
+
+		ctx, cancel := context.WithTimeout(context.Background(), 400*time.Millisecond)
+		defer cancel()
+
+		r, err := client.ClearBucket(ctx, &api.ClearBucketRequest{Ip: ip, Login: login})
+		if err != nil {
+			handlerError(err, t)
+		}
+		if !r.Success {
+			t.Error("not success")
+		}
+
+		if ipCount, err := bucketsRepository.GetCountByKey("ip", ip); err != nil {
+			t.Error(err)
+		} else if ipCount != 0 {
+			t.Error("ip Count != 0")
+		}
+
+		if loginCount, err := bucketsRepository.GetCountByKey("login", ip); err != nil {
+			t.Error(err)
+		} else if loginCount != 0 {
+			t.Error("login Count != 0")
+		}
+	})
 }

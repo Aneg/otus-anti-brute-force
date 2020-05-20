@@ -49,6 +49,23 @@ func TestBucket_Hold(t *testing.T) {
 	}
 }
 
+func TestBucket_Drop(t *testing.T) {
+	log2.Logger, _ = getLogger("logs/logs.log", "info")
+
+	asRep := mock.BucketsRepository{
+		Data: map[string]uint{"test": 1},
+	}
+	bucket := NewBucket("test", &asRep, 3)
+
+	if err := bucket.Clear("test"); err != nil {
+		t.Error(err)
+	}
+	if _, ok := asRep.Data["test"]; ok {
+		t.Error("bucket not clear")
+	}
+
+}
+
 func getLogger(logFile, logLevel string) (logger *zap.Logger, err error) {
 	var level zapcore.Level
 	switch logLevel {

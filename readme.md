@@ -17,11 +17,13 @@
 # Консольная утилита
 Очень простая без заморочек. 
 
+actions - `add_white_list`, `drop_white_list`, `add_black_list`, `drop_black_list`, `clear_ip_bucket`, `clear_login_bucket`, `clear_password_bucket`
+
 Примеры использования:
 
-`docker-compose run app go run cmd/management_console/main.go -confi=configs/config.yaml -action=add -name=white -mask=123.23.44.55/8`
+`docker-compose run app go run cmd/management_console/main.go -confi=configs/config.yaml -action=add_white_list -value=123.23.44.55/8`
 
-`docker-compose run app go run cmd/management_console/main.go -action=drop -name=black -mask=123.23.44.55/8`
+`docker-compose run app go run cmd/management_console/main.go -action=clear_login_bucket -value=Vasiliy`
 
 # Что не доделал
 

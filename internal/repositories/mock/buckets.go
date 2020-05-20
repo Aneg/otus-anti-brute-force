@@ -21,3 +21,10 @@ func (b *BucketsRepository) GetCountByKey(bucketName, value string) (uint, error
 		return b.Data[value], nil
 	}
 }
+
+func (b *BucketsRepository) Clear(bucketName, value string) error {
+	if _, ok := b.Data[value]; ok {
+		delete(b.Data, value)
+	}
+	return nil
+}

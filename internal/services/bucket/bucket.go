@@ -28,3 +28,7 @@ func (b *Bucket) Hold(str string) (bool, error) {
 	}
 	return true, nil
 }
+
+func (b *Bucket) Clear(str string) error {
+	return b.repository.Clear(b.name, str)
+}
