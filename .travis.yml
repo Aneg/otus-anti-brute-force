@@ -5,9 +5,11 @@ language: go
 go:
   - 1.14.x
 
+go_import_path: github.com/Aneg/otus-anti-brute-force
+
 env:
   - GO111MODULE=on
 
 script:
   - pwd
-  - go test -v -race ./...
+  - go test -v ./...
