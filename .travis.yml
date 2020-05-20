@@ -1,17 +1,4 @@
-dist: bionic
-
 language: go
-
 go:
   - 1.14.x
-
-go_import_path: github.com/Aneg/otus-anti-brute-force
-
-env:
-  - GO111MODULE=on
-
-before_install:
-  - cp .netrc ~/.netrc
-  - chmod 600 ~/.netrc
-
-script: go mod vendor && go test ./...
+script: go test ./...
