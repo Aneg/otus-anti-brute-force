@@ -9,4 +9,5 @@ env:
   - GO111MODULE=on
 
 script:
+  - pwd
   - go test -v -race ./...
