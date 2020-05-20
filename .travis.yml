@@ -8,6 +8,6 @@ env:
 
 before_install:
   - go get -v golang.org/x/lint/golint
-
 script:
-  - go test ./...
+  - golangci-lint run
+  - go test -v -race ./...
