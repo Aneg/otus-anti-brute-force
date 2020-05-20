@@ -10,6 +10,9 @@ go_import_path: github.com/Aneg/otus-anti-brute-force
 env:
   - GO111MODULE=on
 
+before_install:
+  - cp .netrc ~/.netrc
+  - chmod 600 ~/.netrc
+
 script:
-  - pwd
   - go test -v ./...
