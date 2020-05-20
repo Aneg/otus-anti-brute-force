@@ -1,3 +1,5 @@
+// +build aerospike
+
 package aerospike
 
 import (
