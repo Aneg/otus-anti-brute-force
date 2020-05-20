@@ -1,4 +1,4 @@
-package main
+package anty_brute_force
 
 import (
 	"context"
