@@ -4,7 +4,7 @@ go:
   - 1.14.x
 
 env:
-  - GO111MODULE=on AMQP_URL=amqp://guest:guest@127.0.0.1:5672/
+  - GO111MODULE=on
 
 before_install:
   - go get -v golang.org/x/lint/golint
