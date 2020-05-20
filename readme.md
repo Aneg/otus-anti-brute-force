@@ -13,6 +13,7 @@
 - запуск / остановка приложения `make run` и `make stop`
 - white / black листы можно обновлять и через grpc. Если разворачивать несколько нод, то листы будут периодически синхронизироваться
 - есть несущественная недоработка: bucket-ы чекаются последовательно, поэтому первые 2 могут инкриментнуться и пропустить, а последний не пропустит. Но это субъективно.
+- CI/CD через travis ci: https://travis-ci.com/github/Aneg/otus-anti-brute-force
 
 # Консольная утилита
 Очень простая без заморочек. Работает через базы, а не через grpc. 
@@ -24,10 +25,6 @@ actions - `add_white_list`, `drop_white_list`, `add_black_list`, `drop_black_lis
 `docker-compose run app go run cmd/management_console/main.go -confi=configs/config.yaml -action=add_white_list -value=123.23.44.55/8`
 
 `docker-compose run app go run cmd/management_console/main.go -action=clear_login_bucket -value=Vasiliy`
-
-# Что не доделал
-
-- CI/CD 
 
 
 # ТЗ на сервис "Анти-брутфорс"
